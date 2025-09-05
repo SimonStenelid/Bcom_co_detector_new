@@ -1,0 +1,32 @@
+timestamp,site,partner,origin,destination,journey_type,dep_date,ret_date,pax_config,cabin,stops,ip,user_agent,session_id,referrer,cookie_present,http_version,status_code,request_id
+2025-01-15T22:00:00Z,site1,partner1,LAX,NYC,OW,2025-01-20,,1-0-0,economy,0,192.168.1.1,Mozilla/5.0 (Bot),sess1,,false,1.1,200,req1
+2025-01-15T22:00:01Z,site1,partner1,LAX,NYC,OW,2025-01-20,,1-0-0,economy,0,192.168.1.1,Mozilla/5.0 (Bot),sess1,,false,1.1,200,req2
+2025-01-15T22:00:02Z,site1,partner1,LAX,NYC,OW,2025-01-20,,1-0-0,economy,0,192.168.1.1,Mozilla/5.0 (Bot),sess1,,false,1.1,200,req3
+2025-01-15T22:00:03Z,site1,partner1,LAX,NYC,OW,2025-01-21,,1-0-0,economy,0,192.168.1.1,Mozilla/5.0 (Bot),sess1,,false,1.1,200,req4
+2025-01-15T22:00:04Z,site1,partner1,LAX,NYC,OW,2025-01-21,,1-0-0,economy,0,192.168.1.1,Mozilla/5.0 (Bot),sess1,,false,1.1,200,req5
+2025-01-15T22:00:05Z,site1,partner1,LAX,NYC,OW,2025-01-22,,1-0-0,economy,0,192.168.1.1,Mozilla/5.0 (Bot),sess1,,false,1.1,200,req6
+2025-01-15T22:00:06Z,site1,partner1,LAX,NYC,OW,2025-01-22,,1-0-0,economy,0,192.168.1.1,Mozilla/5.0 (Bot),sess1,,false,1.1,200,req7
+2025-01-15T22:00:07Z,site1,partner1,LAX,NYC,OW,2025-01-23,,1-0-0,economy,0,192.168.1.1,Mozilla/5.0 (Bot),sess1,,false,1.1,200,req8
+2025-01-15T22:00:08Z,site1,partner1,LAX,NYC,OW,2025-01-23,,1-0-0,economy,0,192.168.1.1,Mozilla/5.0 (Bot),sess1,,false,1.1,200,req9
+2025-01-15T22:00:09Z,site1,partner1,LAX,NYC,OW,2025-01-24,,1-0-0,economy,0,192.168.1.1,Mozilla/5.0 (Bot),sess1,,false,1.1,200,req10
+2025-01-15T10:30:00Z,site1,partner1,SFO,CHI,RT,2025-01-25,2025-01-30,2-0-0,business,1,192.168.1.2,Mozilla/5.0 (Human),sess2,https://google.com,true,2,200,req11
+2025-01-15T10:35:00Z,site1,partner1,SFO,CHI,RT,2025-01-25,2025-01-30,2-0-0,business,1,192.168.1.2,Mozilla/5.0 (Human),sess2,https://google.com,true,2,200,req12
+2025-01-15T10:40:00Z,site1,partner1,SFO,CHI,RT,2025-01-26,2025-01-31,2-0-0,business,1,192.168.1.2,Mozilla/5.0 (Human),sess2,https://google.com,true,2,200,req13
+2025-01-15T10:45:00Z,site1,partner1,SFO,CHI,RT,2025-01-26,2025-01-31,2-0-0,business,1,192.168.1.2,Mozilla/5.0 (Human),sess2,https://google.com,true,2,200,req14
+2025-01-15T10:50:00Z,site1,partner1,SFO,CHI,RT,2025-01-27,2025-02-01,2-0-0,business,1,192.168.1.2,Mozilla/5.0 (Human),sess2,https://google.com,true,2,200,req15
+2025-01-15T23:15:00Z,site1,partner1,DFW,MIA,OW,2025-01-28,,1-0-0,economy,0,192.168.1.3,Python-urllib/3.9,sess3,,false,1.1,200,req16
+2025-01-15T23:15:01Z,site1,partner1,DFW,MIA,OW,2025-01-28,,1-0-0,economy,0,192.168.1.3,Python-urllib/3.9,sess3,,false,1.1,200,req17
+2025-01-15T23:15:02Z,site1,partner1,DFW,MIA,OW,2025-01-28,,1-0-0,economy,0,192.168.1.3,Python-urllib/3.9,sess3,,false,1.1,200,req18
+2025-01-15T23:15:03Z,site1,partner1,DFW,MIA,OW,2025-01-28,,1-0-0,economy,0,192.168.1.3,Python-urllib/3.9,sess3,,false,1.1,200,req19
+2025-01-15T23:15:04Z,site1,partner1,DFW,MIA,OW,2025-01-28,,1-0-0,economy,0,192.168.1.3,Python-urllib/3.9,sess3,,false,1.1,200,req20
+2025-01-15T23:15:05Z,site1,partner1,DFW,MIA,OW,2025-01-28,,1-0-0,economy,0,192.168.1.3,Python-urllib/3.9,sess3,,false,1.1,200,req21
+2025-01-15T23:15:06Z,site1,partner1,DFW,MIA,OW,2025-01-28,,1-0-0,economy,0,192.168.1.3,Python-urllib/3.9,sess3,,false,1.1,200,req22
+2025-01-15T23:15:07Z,site1,partner1,DFW,MIA,OW,2025-01-28,,1-0-0,economy,0,192.168.1.3,Python-urllib/3.9,sess3,,false,1.1,200,req23
+2025-01-15T23:15:08Z,site1,partner1,DFW,MIA,OW,2025-01-28,,1-0-0,economy,0,192.168.1.3,Python-urllib/3.9,sess3,,false,1.1,200,req24
+2025-01-15T23:15:09Z,site1,partner1,DFW,MIA,OW,2025-01-28,,1-0-0,economy,0,192.168.1.3,Python-urllib/3.9,sess3,,false,1.1,200,req25
+2025-01-15T23:15:10Z,site1,partner1,DFW,MIA,OW,2025-01-28,,1-0-0,economy,0,192.168.1.3,Python-urllib/3.9,sess3,,false,1.1,200,req26
+2025-01-15T11:00:00Z,site1,partner1,SEA,LAX,OW,2025-01-29,,1-0-0,economy,0,192.168.1.4,Mozilla/5.0 (Human),sess4,https://bing.com,true,2,200,req27
+2025-01-15T11:15:00Z,site1,partner1,SEA,LAX,OW,2025-01-29,,1-0-0,economy,0,192.168.1.4,Mozilla/5.0 (Human),sess4,https://bing.com,true,2,200,req28
+2025-01-15T11:30:00Z,site1,partner1,SEA,LAX,OW,2025-01-30,,1-0-0,economy,0,192.168.1.4,Mozilla/5.0 (Human),sess4,https://bing.com,true,2,200,req29
+2025-01-15T11:45:00Z,site1,partner1,SEA,LAX,OW,2025-01-30,,1-0-0,economy,0,192.168.1.4,Mozilla/5.0 (Human),sess4,https://bing.com,true,2,200,req30
+2025-01-15T12:00:00Z,site1,partner1,SEA,LAX,OW,2025-01-31,,1-0-0,economy,0,192.168.1.4,Mozilla/5.0 (Human),sess4,https://bing.com,true,2,200,req31
