@@ -1,5 +1,5 @@
 {
-  "name": "Botminer Google Drive Pipeline",
+  "name": "Botminer Local Pipeline",
   "nodes": [
     {
       "parameters": {
@@ -21,77 +21,20 @@
     },
     {
       "parameters": {
-        "operation": "download",
-        "fileId": "YOUR_FILE_ID",
-        "options": {}
+        "command": "cd \\\"\\\\\\\\etraveli.net\\\\storage\\\\home\\\\uppsala\\\\simste\\\\Documents\\\\Entry Click Bot Collection\\\" && python -m botminer.cli pipeline {{$now.format('YYYY-MM-DD')}} --csv-path data\\\\botminer_input.csv --config config.yaml"
       },
       "id": "2",
-      "name": "Download CSV",
-      "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 2,
-      "position": [
-        450,
-        300
-      ],
-      "credentials": {
-        "googleDriveOAuth2Api": {
-          "id": "YOUR_CREDENTIAL_ID",
-          "name": "Google Drive OAuth2"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "fileName": "\\\\etraveli.net\\storage\\home\\uppsala\\simste\\Documents\\Entry Click Bot Collection\\botminer_input.csv",
-        "dataPropertyName": "data"
-      },
-      "id": "3",
-      "name": "Save File",
-      "type": "n8n-nodes-base.writeBinaryFile",
-      "typeVersion": 1,
-      "position": [
-        650,
-        300
-      ]
-    },
-    {
-      "parameters": {
-        "command": "cd \"\\\\etraveli.net\\storage\\home\\uppsala\\simste\\Documents\\Entry Click Bot Collection\" && python -m botminer.cli pipeline {{$now.format('YYYY-MM-DD')}} --csv-path \"\\\\etraveli.net\\storage\\home\\uppsala\\simste\\Documents\\Entry Click Bot Collection\\botminer_input.csv\" --config config.yaml"
-      },
-      "id": "4",
       "name": "Run Botminer",
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        850,
+        450,
         300
       ]
     }
   ],
   "connections": {
     "Cron": {
-      "main": [
-        [
-          {
-            "node": "Download CSV",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Download CSV": {
-      "main": [
-        [
-          {
-            "node": "Save File",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Save File": {
       "main": [
         [
           {
