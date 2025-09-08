@@ -63,7 +63,7 @@ class TestIngest:
         
         # Check boolean normalization
         assert normalized_df['cookie_present'].dtype == 'bool'
-        assert normalized_df['cookie_present'].iloc[0] is True
+        assert normalized_df['cookie_present'].iloc[0] == True
     
     def test_add_derived_columns(self, sample_csv_data, config):
         """Test derived column addition."""

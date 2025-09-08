@@ -12,11 +12,12 @@ features:
 scoring:
   weights:
     cadence: 0.2
-    repetition: 0.3
-    speed: 0.2
+    repetition: 0.25
+    speed: 0.15
     hygiene: 0.15
     protocol: 0.1
     volume: 0.05
+    ip_churn: 0.1
   alpha_blend_iso: 0.5
   thresholds:
     high: 0.75

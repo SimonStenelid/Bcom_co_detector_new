@@ -312,10 +312,10 @@ def _handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
         if col in df.columns:
             if df[col].isna().sum() > 0:
                 logger.info(f"Filling {df[col].isna().sum()} missing values in {col}")
-                if default_value is None:
-                    # Don't fill None values, leave them as is
-                    continue
-                df[col] = df[col].fillna(default_value)
+                if default_value is not None:
+                    df[col] = df[col].fillna(default_value)
+        else:
+            df[col] = default_value
     
     return df
 
@@ -344,7 +344,7 @@ def _add_derived_columns(df: pd.DataFrame, date: str, config: Config) -> pd.Data
     )
     
     # Add hour from timestamp
-    if 'timestamp' in df.columns:
+    if 'timestamp' in df.columns and pd.api.types.is_datetime64_any_dtype(df['timestamp']):
         df['hour'] = df['timestamp'].dt.hour
         df['minute'] = df['timestamp'].dt.minute
         df['day_of_week'] = df['timestamp'].dt.dayofweek
