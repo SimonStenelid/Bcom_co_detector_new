@@ -42,7 +42,7 @@
     },
     {
       "parameters": {
-        "fileName": "/tmp/botminer_input.csv",
+        "fileName": "\\\\etraveli.net\\storage\\home\\uppsala\\simste\\Documents\\Entry Click Bot Collection\\botminer_input.csv",
         "dataPropertyName": "data"
       },
       "id": "3",
@@ -56,7 +56,7 @@
     },
     {
       "parameters": {
-        "command": "cd /workspace/Bot_pattern_analyzer && python -m botminer.cli pipeline {{$now.format('YYYY-MM-DD')}} --csv-path /tmp/botminer_input.csv --config config.yaml"
+        "command": "cd \"\\\\etraveli.net\\storage\\home\\uppsala\\simste\\Documents\\Entry Click Bot Collection\" && python -m botminer.cli pipeline {{$now.format('YYYY-MM-DD')}} --csv-path \"\\\\etraveli.net\\storage\\home\\uppsala\\simste\\Documents\\Entry Click Bot Collection\\botminer_input.csv\" --config config.yaml"
       },
       "id": "4",
       "name": "Run Botminer",
