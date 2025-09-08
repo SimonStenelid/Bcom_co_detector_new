@@ -20,8 +20,7 @@ from .utils.signatures import (
 )
 from .utils.stats import (
     compute_http_version_stats, compute_status_code_stats, compute_error_bursts,
-    compute_ua_churn_per_ip, compute_session_stats, compute_hygiene_stats,
-    compute_volume_stats
+    compute_session_stats, compute_hygiene_stats, compute_volume_stats
 )
 
 
@@ -52,15 +51,18 @@ def build_features(date: str, config: Config) -> Dict[str, Any]:
     df_filtered = df[df['cohort_key'].isin(valid_cohorts)]
     
     logger.info(f"Processing {len(valid_cohorts)} cohorts with >= {config.ingest.min_events_per_cohort} events")
-    
+
+    # Compute user agent churn per IP across all data
+    ip_churn_map = df_filtered.groupby('ip')['user_agent'].nunique()
+
     # Build features for each cohort
     cohort_features = []
-    
+
     for cohort_key in valid_cohorts:
         cohort_data = df_filtered[df_filtered['cohort_key'] == cohort_key]
-        
+
         try:
-            features = _build_cohort_features(cohort_data, config)
+            features = _build_cohort_features(cohort_data, config, ip_churn_map)
             cohort_features.append(features)
         except Exception as e:
             logger.warning(f"Error building features for cohort {cohort_key}: {e}")
@@ -86,7 +88,11 @@ def build_features(date: str, config: Config) -> Dict[str, Any]:
     }
 
 
-def _build_cohort_features(cohort_data: pd.DataFrame, config: Config) -> Dict[str, Any]:
+def _build_cohort_features(
+    cohort_data: pd.DataFrame,
+    config: Config,
+    ip_churn_map: pd.Series
+) -> Dict[str, Any]:
     """Build features for a single cohort."""
     
     # Basic cohort info
@@ -116,7 +122,7 @@ def _build_cohort_features(cohort_data: pd.DataFrame, config: Config) -> Dict[st
     features.update(signature_features)
     
     # Client/network features
-    client_features = _build_client_features(cohort_data)
+    client_features = _build_client_features(cohort_data, ip_churn_map)
     features.update(client_features)
     
     # Volume features
@@ -244,7 +250,10 @@ def _build_signature_features(cohort_data: pd.DataFrame) -> Dict[str, Any]:
     return features
 
 
-def _build_client_features(cohort_data: pd.DataFrame) -> Dict[str, Any]:
+def _build_client_features(
+    cohort_data: pd.DataFrame,
+    ip_churn_map: pd.Series
+) -> Dict[str, Any]:
     """Build client and network features."""
     features = {}
     
@@ -266,13 +275,10 @@ def _build_client_features(cohort_data: pd.DataFrame) -> Dict[str, Any]:
         cohort_data.get('referrer', pd.Series())
     )
     features.update(hygiene_stats)
-    
-    # User agent churn per IP
-    if 'ip' in cohort_data.columns and 'user_agent' in cohort_data.columns:
-        ua_churn = compute_ua_churn_per_ip(cohort_data['ip'], cohort_data['user_agent'])
-        features['ua_churn_per_ip_day'] = ua_churn.iloc[0] if len(ua_churn) > 0 else 1
-    else:
-        features['ua_churn_per_ip_day'] = 1
+
+    # User agent churn per IP (precomputed across the day)
+    ip_value = cohort_data['ip'].iloc[0] if 'ip' in cohort_data.columns else 'unknown'
+    features['ua_churn_per_ip_day'] = int(ip_churn_map.get(ip_value, 1))
     
     # User agent diversity analysis
     if 'user_agent_type' in cohort_data.columns:

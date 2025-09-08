@@ -131,6 +131,14 @@ def _compute_rule_scores(features_df: pd.DataFrame, config: Config) -> np.ndarra
             np.log1p(features_df['n_events'].fillna(0)) / 10.0, 1.0
         )
         scores += weights['volume'] * volume_score
+
+    # IP churn score (many user agents per IP = more bot-like)
+    if 'ua_churn_per_ip_day' in features_df.columns and 'ip_churn' in weights:
+        ip_score = np.minimum(
+            (features_df['ua_churn_per_ip_day'].fillna(1) - 1) / 4.0,
+            1.0
+        )
+        scores += weights['ip_churn'] * ip_score
     
     # Normalize to [0, 1]
     scores = np.clip(scores, 0, 1)
@@ -157,6 +165,10 @@ def _compute_anomaly_scores(features_df: pd.DataFrame, config: Config, date: str
     
     if len(feature_cols) == 0:
         logger.warning("No numeric features found for anomaly detection")
+        return np.zeros(len(features_df))
+
+    if len(features_df) < 2:
+        logger.warning("Not enough samples for anomaly detection")
         return np.zeros(len(features_df))
     
     # Prepare feature matrix
@@ -191,16 +203,16 @@ def _compute_anomaly_scores(features_df: pd.DataFrame, config: Config, date: str
     logger.info(f"Anomaly scores - mean: {normalized_scores.mean():.3f}, std: {normalized_scores.std():.3f}")
     
     # Save model for future use
-    model_path = config.get_paths(date)['features'].parent / f"iso_model_{date}.pkl"
-    with open(model_path, 'wb') as f:
-        pickle.dump({
-            'model': iso_forest,
-            'scaler': scaler,
-            'feature_cols': feature_cols,
-            'date': date
-        }, f)
-    
-    logger.info(f"Saved Isolation Forest model to: {model_path}")
+    if date is not None:
+        model_path = config.get_paths(date)['features'].parent / f"iso_model_{date}.pkl"
+        with open(model_path, 'wb') as f:
+            pickle.dump({
+                'model': iso_forest,
+                'scaler': scaler,
+                'feature_cols': feature_cols,
+                'date': date
+            }, f)
+        logger.info(f"Saved Isolation Forest model to: {model_path}")
     
     return normalized_scores
 

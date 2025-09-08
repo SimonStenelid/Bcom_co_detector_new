@@ -41,6 +41,7 @@ class TestScoring:
             'http11_share': [0.9, 0.3, 0.95, 0.2, 0.8],  # High HTTP/1.1 = bot-like
             'http2_share': [0.1, 0.7, 0.05, 0.8, 0.2],
             'ladder_sweep': [True, False, True, False, False],
+            'ua_churn_per_ip_day': [5, 1, 6, 1, 4],
             'hourly_hist_00': [0.1, 0.01, 0.2, 0.005, 0.15],
             'hourly_hist_01': [0.1, 0.01, 0.2, 0.005, 0.15],
             'hourly_hist_02': [0.1, 0.01, 0.2, 0.005, 0.15],

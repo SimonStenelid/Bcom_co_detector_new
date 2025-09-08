@@ -42,9 +42,10 @@ def compute_hourly_histogram(hours: pd.Series) -> np.ndarray:
 
 def compute_hourly_entropy(hourly_hist: np.ndarray) -> float:
     """Compute entropy of hourly distribution."""
-    # Add small epsilon to avoid log(0)
-    hist_safe = hourly_hist + 1e-10
-    return -np.sum(hist_safe * np.log2(hist_safe))
+    hist = hourly_hist[hourly_hist > 0]
+    if len(hist) == 0:
+        return 0.0
+    return float(-np.sum(hist * np.log2(hist)))
 
 
 def compute_gini_coefficient(values: np.ndarray) -> float:
@@ -78,7 +79,8 @@ def compute_gap_stats(gaps: np.ndarray, percentiles: List[int]) -> dict:
     
     stats = {}
     for p in percentiles:
-        stats[f"gap_p{p}"] = np.percentile(gaps, p)
+        method = 'higher' if p >= 95 else 'lower'
+        stats[f"gap_p{p}"] = float(np.percentile(gaps, p, method=method))
     
     # Additional gap statistics
     stats["gap_p95_over_p50"] = (

@@ -71,7 +71,8 @@ class TestFeatures:
         # Get first cohort
         cohort_data = sample_raw_data[sample_raw_data['cohort_key'] == sample_raw_data['cohort_key'].iloc[0]]
         
-        features = _build_cohort_features(cohort_data, config)
+        ip_churn_map = sample_raw_data.groupby('ip')['user_agent'].nunique()
+        features = _build_cohort_features(cohort_data, config, ip_churn_map)
         
         # Check basic cohort info
         assert features['cohort_key'] == sample_raw_data['cohort_key'].iloc[0]
@@ -173,7 +174,8 @@ class TestFeatures:
         }
         
         edge_df = pd.DataFrame(edge_case_data)
-        features = _build_cohort_features(edge_df, config)
+        ip_churn_map = edge_df.groupby('ip')['user_agent'].nunique()
+        features = _build_cohort_features(edge_df, config, ip_churn_map)
         
         # Check that edge cases are handled gracefully
         assert features['n_events'] == 2
@@ -188,9 +190,12 @@ class TestFeatures:
             # Save sample data
             raw_path = os.path.join(temp_dir, '2025-01-15.parquet')
             sample_raw_data.to_parquet(raw_path, index=False)
-            
+
+            features_dir = os.path.join(temp_dir, 'features')
+            os.makedirs(features_dir, exist_ok=True)
+
             config.io.input_dir = temp_dir
-            config.io.features_dir = temp_dir
+            config.io.features_dir = features_dir
             config.io.history_dir = temp_dir
             config.ingest.min_events_per_cohort = 3
             
@@ -210,15 +215,18 @@ class TestFeatures:
         with tempfile.TemporaryDirectory() as temp_dir:
             raw_path = os.path.join(temp_dir, '2025-01-15.parquet')
             sample_raw_data.to_parquet(raw_path, index=False)
-            
+
+            features_dir = os.path.join(temp_dir, 'features')
+            os.makedirs(features_dir, exist_ok=True)
+
             config.io.input_dir = temp_dir
-            config.io.features_dir = temp_dir
+            config.io.features_dir = features_dir
             config.ingest.min_events_per_cohort = 10  # High threshold
-            
+
             # Should filter out cohorts with < 10 events
             result = build_features('2025-01-15', config)
             assert result['cohorts_processed'] == 0  # No cohorts meet threshold
-            
+
             # Lower threshold
             config.ingest.min_events_per_cohort = 3
             result = build_features('2025-01-15', config)
