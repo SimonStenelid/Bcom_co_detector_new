@@ -114,6 +114,16 @@ def _compute_rule_scores(features_df: pd.DataFrame, config: Config) -> np.ndarra
             (1 - features_df['referrer_rate'].fillna(0))
         ) / 2.0
         scores += weights['hygiene'] * hygiene_score
+
+    # Full UA concentration (high share of identical full UA string = more bot-like)
+    if 'ua_full_mode_share' in features_df.columns:
+        ua_full_conc = features_df['ua_full_mode_share'].fillna(0)
+        scores += weights.get('ua_full_concentration', 0.1) * ua_full_conc
+
+    # IP diversity by full UA (same UA string used from many IPs = more bot-like)
+    if 'ua_full_ip_diversity_ratio' in features_df.columns:
+        ua_ip_div_ratio = features_df['ua_full_ip_diversity_ratio'].fillna(0)
+        scores += weights.get('ua_full_ip_diversity', 0.1) * ua_ip_div_ratio
     
     # Protocol score (suspicious HTTP patterns = more bot-like)
     if 'http11_share' in features_df.columns and 'http2_share' in features_df.columns:

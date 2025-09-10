@@ -62,6 +62,7 @@ def _generate_csv_report(features_df: pd.DataFrame, date: str, config: Config, r
     # Select columns for CSV report
     csv_columns = [
         'cohort_key', 'date', 'site', 'partner', 'ip', 'user_agent',
+        'ua_full', 'ua_full_mode_share', 'ua_full_ip_diversity', 'ua_full_ip_diversity_ratio',
         'rule_score', 'iso_score', 'botness', 'risk_band',
         'n_events', 'night_share', 'top_signature_share', 'repeat_ratio',
         'gap_p50', 'max_run_lt_1s', 'cookie_rate', 'referrer_rate',
@@ -162,6 +163,7 @@ def _format_cohorts_for_json(cohorts_df: pd.DataFrame) -> List[Dict[str, Any]]:
     # Select key columns
     key_columns = [
         'cohort_key', 'site', 'partner', 'ip', 'user_agent',
+        'ua_full', 'ua_full_mode_share', 'ua_full_ip_diversity', 'ua_full_ip_diversity_ratio',
         'rule_score', 'iso_score', 'botness', 'risk_band',
         'n_events', 'night_share', 'top_signature_share', 'repeat_ratio',
         'gap_p50', 'max_run_lt_1s', 'cookie_rate', 'referrer_rate',
@@ -271,6 +273,28 @@ No cohorts were processed for this date. This could be due to:
     else:
         content += "No medium risk cohorts found.\n"
     
+    # Add IP diversity by full user agent section
+    try:
+        ua_div = features_df[[
+            'ua_full', 'ua_full_ip_diversity', 'ua_full_ip_diversity_ratio'
+        ]].dropna().drop_duplicates()
+        if len(ua_div) > 0:
+            ua_div = ua_div.sort_values('ua_full_ip_diversity', ascending=False).head(10)
+            content += "\n## IP Diversity by Full User Agent\n\n"
+            content += "Top UA strings by number of unique IPs observed for this date. High values can indicate automated clients shared across many IPs.\n\n"
+            # Build table
+            header_cols = ['ua_full', 'unique_ips', 'ip_share']
+            content += "| ua_full | unique_ips | ip_share |\n"
+            content += "| --- | --- | --- |\n"
+            for _, row in ua_div.iterrows():
+                ua = str(row.get('ua_full', 'Unknown'))
+                unique_ips = int(row.get('ua_full_ip_diversity', 0))
+                share = float(row.get('ua_full_ip_diversity_ratio', 0.0))
+                content += f"| {ua} | {unique_ips} | {share:.3f} |\n"
+    except Exception:
+        # Don't break report generation for this section
+        pass
+    
     content += f"""
 ## Configuration
 
@@ -298,7 +322,7 @@ This report uses a combination of rule-based scoring and anomaly detection to id
 ---
 *Report generated on {timestamp}*
 """
-    
+
     return content
 
 

@@ -17,6 +17,8 @@ scoring:
     hygiene: 0.15
     protocol: 0.1
     volume: 0.05
+    ua_full_concentration: 0.1
+    ua_full_ip_diversity: 0.1
   alpha_blend_iso: 0.5
   thresholds:
     high: 0.75

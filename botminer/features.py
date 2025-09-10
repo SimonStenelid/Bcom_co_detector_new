@@ -45,6 +45,15 @@ def build_features(date: str, config: Config) -> Dict[str, Any]:
     
     logger.info(f"Loading raw data from: {raw_path}")
     df = pd.read_parquet(raw_path)
+
+    # Compute global IP diversity per full user agent for this date
+    ua_full_col = 'user_agent_full' if 'user_agent_full' in df.columns else None
+    ua_full_ip_diversity_map = {}
+    total_unique_ips = df['ip'].nunique() if 'ip' in df.columns else 0
+    if ua_full_col and 'ip' in df.columns:
+        ua_full_ip_diversity_map = (
+            df.groupby(ua_full_col)['ip'].nunique().to_dict()
+        )
     
     # Filter to minimum events per cohort
     cohort_sizes = df['cohort_key'].value_counts()
@@ -60,7 +69,12 @@ def build_features(date: str, config: Config) -> Dict[str, Any]:
         cohort_data = df_filtered[df_filtered['cohort_key'] == cohort_key]
         
         try:
-            features = _build_cohort_features(cohort_data, config)
+            features = _build_cohort_features(
+                cohort_data,
+                config,
+                ua_full_ip_diversity_map=ua_full_ip_diversity_map,
+                total_unique_ips=total_unique_ips,
+            )
             cohort_features.append(features)
         except Exception as e:
             logger.warning(f"Error building features for cohort {cohort_key}: {e}")
@@ -86,7 +100,12 @@ def build_features(date: str, config: Config) -> Dict[str, Any]:
     }
 
 
-def _build_cohort_features(cohort_data: pd.DataFrame, config: Config) -> Dict[str, Any]:
+def _build_cohort_features(
+    cohort_data: pd.DataFrame,
+    config: Config,
+    ua_full_ip_diversity_map: Dict[str, int] | None = None,
+    total_unique_ips: int | None = None,
+) -> Dict[str, Any]:
     """Build features for a single cohort."""
     
     # Basic cohort info
@@ -106,7 +125,28 @@ def _build_cohort_features(cohort_data: pd.DataFrame, config: Config) -> Dict[st
         features['device_type'] = cohort_data['device_type'].iloc[0]
     if 'os_type' in cohort_data.columns:
         features['os_type'] = cohort_data['os_type'].iloc[0]
-    
+
+    # Full user agent concentration within cohort (exact string)
+    if 'user_agent_full' in cohort_data.columns:
+        ua_full_counts = cohort_data['user_agent_full'].value_counts()
+        if len(ua_full_counts) > 0:
+            ua_full_mode = ua_full_counts.index[0]
+            ua_full_mode_share = ua_full_counts.iloc[0] / len(cohort_data)
+            features['ua_full'] = ua_full_mode
+            features['ua_full_mode_share'] = float(ua_full_mode_share)
+            # IP diversity for this UA full across the full day
+            if ua_full_ip_diversity_map is not None and total_unique_ips:
+                ip_div = int(ua_full_ip_diversity_map.get(ua_full_mode, 1))
+                features['ua_full_ip_diversity'] = ip_div
+                features['ua_full_ip_diversity_ratio'] = (
+                    float(ip_div) / float(total_unique_ips)
+                ) if total_unique_ips > 0 else 0.0
+        else:
+            features['ua_full'] = 'Unknown'
+            features['ua_full_mode_share'] = 0.0
+            features['ua_full_ip_diversity'] = 1
+            features['ua_full_ip_diversity_ratio'] = 0.0
+
     # Time-based features
     time_features = _build_time_features(cohort_data, config)
     features.update(time_features)

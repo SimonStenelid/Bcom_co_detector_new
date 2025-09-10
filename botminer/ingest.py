@@ -100,15 +100,22 @@ def _merge_ip_data(df: pd.DataFrame, ip_df: pd.DataFrame) -> pd.DataFrame:
     """Merge IP data with main dataframe using the ID field."""
     logger = logging.getLogger(__name__)
     
-    # Clean column names in IP dataframe - handle the escaped dots properly
-    ip_df.columns = ip_df.columns.str.replace(r'mdc\\.', '', regex=True)
+    # Clean column names in IP dataframe - handle the escaped dots properly (mdc\.addr -> addr)
+    ip_df.columns = ip_df.columns.str.replace(r'mdc\.', '', regex=True)
     
     logger.info(f"IP dataframe columns after cleaning: {list(ip_df.columns)}")
     
-    # The ID field in main df should match the 'click' field in IP df
-    # Find the ID column in main df (it's the last column)
-    id_col = df.columns[-1]  # Last column should be the ID
-    logger.info(f"Using ID column: {id_col}")
+    # The click ID field in the main df should match the 'click' field in IP df
+    # New booking exports have two 'ID' columns: the first is the 4-digit user agent ID,
+    # and the second (last) ID column is the click ID. Select the last ID-like column.
+    id_candidates = [col for col in df.columns if str(col).strip().upper().startswith('ID')]
+    if not id_candidates:
+        # Fallback to previous heuristic but log a warning
+        logger.warning("No explicit 'ID' columns found; defaulting to last column for click ID merge")
+        id_col = df.columns[-1]
+    else:
+        id_col = id_candidates[-1]
+    logger.info(f"Using click ID column for merge: {id_col}")
     
     # Check if the required columns exist
     if 'click' not in ip_df.columns or 'addr' not in ip_df.columns:

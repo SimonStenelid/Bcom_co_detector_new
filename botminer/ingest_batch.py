@@ -41,7 +41,9 @@ def ingest_all_data(
     
     # Find all data files
     data_path = Path(data_dir)
+    # Support both legacy booking_* files and new entry_clicks export names
     booking_files = list(data_path.glob("booking_*.csv"))
+    booking_files += list(data_path.glob("*entry_clicks*.csv"))
     ip_files = list(data_path.glob("On_demand_report_*.csv"))
     
     # Enhanced progress logging
@@ -174,8 +176,8 @@ def _merge_all_data(booking_df: pd.DataFrame, ip_df: pd.DataFrame) -> pd.DataFra
     """Merge all booking and IP data."""
     logger = logging.getLogger(__name__)
     
-    # Clean column names in IP dataframe
-    ip_df.columns = ip_df.columns.str.replace(r'mdc\\.', '', regex=True)
+    # Clean column names in IP dataframe (mdc\.addr -> addr)
+    ip_df.columns = ip_df.columns.str.replace(r'mdc\.', '', regex=True)
     logger.info(f"IP dataframe columns after cleaning: {list(ip_df.columns)}")
     
     # Find the ID column in booking df (it's the last column before any additional columns)
