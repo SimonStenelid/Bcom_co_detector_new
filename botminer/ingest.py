@@ -259,6 +259,7 @@ def _normalize_dataframe(df: pd.DataFrame, config: Config) -> pd.DataFrame:
         df['timestamp'] = df['timestamp'].apply(
             lambda x: parse_timestamp(str(x), config.ingest.tz)
         )
+        df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
     
     # Normalize string columns
     string_columns = [
@@ -275,7 +276,7 @@ def _normalize_dataframe(df: pd.DataFrame, config: Config) -> pd.DataFrame:
     
     # Normalize boolean columns
     if 'cookie_present' in df.columns:
-        df['cookie_present'] = df['cookie_present'].astype(bool)
+        df['cookie_present'] = df['cookie_present'].apply(lambda x: bool(x))
     
     # Normalize numeric columns
     numeric_columns = ['status_code']
@@ -316,13 +317,14 @@ def _handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     }
     
     for col, default_value in defaults.items():
-        if col in df.columns:
-            if df[col].isna().sum() > 0:
-                logger.info(f"Filling {df[col].isna().sum()} missing values in {col}")
-                if default_value is None:
-                    # Don't fill None values, leave them as is
-                    continue
-                df[col] = df[col].fillna(default_value)
+        if col not in df.columns:
+            df[col] = default_value
+            continue
+        if df[col].isna().sum() > 0:
+            logger.info(f"Filling {df[col].isna().sum()} missing values in {col}")
+            if default_value is None:
+                continue
+            df[col] = df[col].fillna(default_value)
     
     return df
 

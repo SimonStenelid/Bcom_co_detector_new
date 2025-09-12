@@ -132,10 +132,10 @@ def detect_pattern_anomalies(signatures: pd.Series) -> Dict[str, bool]:
     total = len(signatures)
     
     # High repetition: top signature > 50% of events
-    high_repetition = sig_counts.iloc[0] / total > 0.5 if len(sig_counts) > 0 else False
+    high_repetition = bool(sig_counts.iloc[0] / total > 0.5) if len(sig_counts) > 0 else False
     
     # Low diversity: < 5 unique signatures for 100+ events
-    low_diversity = len(sig_counts) < 5 and total >= 100
+    low_diversity = bool(len(sig_counts) < 5 and total > 100)
     
     # Burst pattern: check for temporal clustering
     # This is a simplified check - in practice you'd analyze timestamps

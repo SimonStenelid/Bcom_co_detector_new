@@ -45,12 +45,21 @@ def score_cohorts(date: str, config: Config) -> Dict[str, Any]:
     # Compute anomaly scores using Isolation Forest
     iso_scores = _compute_anomaly_scores(features_df, config, date)
     features_df['iso_score'] = iso_scores
-    
-    # Combine scores
+
+    # Combine rule and anomaly scores
     features_df['botness'] = (
         config.scoring.alpha_blend_iso * features_df['rule_score'] +
         (1 - config.scoring.alpha_blend_iso) * features_df['iso_score']
     )
+
+    # Optionally blend in supervised model predictions if a model exists
+    sup_scores = _compute_supervised_scores(features_df, config)
+    if sup_scores is not None:
+        features_df['supervised_score'] = sup_scores
+        features_df['botness'] = (
+            config.scoring.beta_supervised * features_df['supervised_score'] +
+            (1 - config.scoring.beta_supervised) * features_df['botness']
+        )
     
     # Assign risk bands
     features_df['risk_band'] = _assign_risk_bands(features_df['botness'], config)
@@ -165,7 +174,7 @@ def _compute_anomaly_scores(features_df: pd.DataFrame, config: Config, date: str
     
     feature_cols = [col for col in numeric_cols if col not in exclude_cols]
     
-    if len(feature_cols) == 0:
+    if len(feature_cols) == 0 or len(features_df) < 2:
         logger.warning("No numeric features found for anomaly detection")
         return np.zeros(len(features_df))
     
@@ -201,18 +210,56 @@ def _compute_anomaly_scores(features_df: pd.DataFrame, config: Config, date: str
     logger.info(f"Anomaly scores - mean: {normalized_scores.mean():.3f}, std: {normalized_scores.std():.3f}")
     
     # Save model for future use
-    model_path = config.get_paths(date)['features'].parent / f"iso_model_{date}.pkl"
-    with open(model_path, 'wb') as f:
-        pickle.dump({
-            'model': iso_forest,
-            'scaler': scaler,
-            'feature_cols': feature_cols,
-            'date': date
-        }, f)
-    
-    logger.info(f"Saved Isolation Forest model to: {model_path}")
-    
+    if date is not None:
+        model_path = (
+            config.get_paths(date)['features'].parent / f"iso_model_{date}.pkl"
+        )
+        with open(model_path, 'wb') as f:
+            pickle.dump({
+                'model': iso_forest,
+                'scaler': scaler,
+                'feature_cols': feature_cols,
+                'date': date,
+            }, f)
+        logger.info(f"Saved Isolation Forest model to: {model_path}")
+
     return normalized_scores
+
+
+def _compute_supervised_scores(features_df: pd.DataFrame, config: Config) -> np.ndarray | None:
+    """Load a pre-trained supervised model and produce predictions.
+
+    Returns
+    -------
+    np.ndarray | None
+        Array of scores between 0 and 1 or ``None`` if no model is
+        available.
+    """
+    if len(features_df) == 0:
+        return np.array([])
+
+    model_path = Path(config.io.models_dir) / "model.pkl"
+    if not model_path.exists():
+        return None
+
+    with open(model_path, "rb") as f:
+        obj = pickle.load(f)
+
+    model = obj["model"]
+    scaler = obj["scaler"]
+    feature_cols = obj["feature_cols"]
+
+    X = features_df.reindex(columns=feature_cols, fill_value=0)
+    X_scaled = scaler.transform(X)
+    probs = model.predict_proba(X_scaled)[:, 1]
+
+    # Ensure scores in [0,1]
+    probs = np.clip(probs, 0, 1)
+    logger = logging.getLogger(__name__)
+    logger.info(
+        f"Supervised scores - mean: {probs.mean():.3f}, std: {probs.std():.3f}"
+    )
+    return probs
 
 
 def _assign_risk_bands(botness_scores: pd.Series, config: Config) -> pd.Series:

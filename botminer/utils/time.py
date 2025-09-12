@@ -42,8 +42,10 @@ def compute_hourly_histogram(hours: pd.Series) -> np.ndarray:
 
 def compute_hourly_entropy(hourly_hist: np.ndarray) -> float:
     """Compute entropy of hourly distribution."""
-    # Add small epsilon to avoid log(0)
-    hist_safe = hourly_hist + 1e-10
+    mask = hourly_hist > 0
+    hist_safe = hourly_hist[mask]
+    if hist_safe.size == 0:
+        return 0.0
     return -np.sum(hist_safe * np.log2(hist_safe))
 
 
@@ -78,7 +80,7 @@ def compute_gap_stats(gaps: np.ndarray, percentiles: List[int]) -> dict:
     
     stats = {}
     for p in percentiles:
-        stats[f"gap_p{p}"] = np.percentile(gaps, p)
+        stats[f"gap_p{p}"] = np.percentile(gaps, p, method='nearest')
     
     # Additional gap statistics
     stats["gap_p95_over_p50"] = (
