@@ -29,6 +29,7 @@ class ScoringConfig:
     weights: Dict[str, float]
     thresholds: Dict[str, float]
     alpha_blend_iso: float = 0.5
+    beta_supervised: float = 0.5
 
 
 @dataclass
@@ -55,6 +56,7 @@ class IOConfig:
     features_dir: str = "data/features"
     history_dir: str = "data/history"
     reports_dir: str = "reports"
+    models_dir: str = "data/models"
 
 
 @dataclass

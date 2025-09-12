@@ -20,6 +20,7 @@ scoring:
     ua_full_concentration: 0.1
     ua_full_ip_diversity: 0.1
   alpha_blend_iso: 0.5
+  beta_supervised: 0.5
   thresholds:
     high: 0.75
     medium: 0.55
@@ -41,6 +42,7 @@ io:
   features_dir: "data/features"
   history_dir: "data/history"
   reports_dir: "reports"
+  models_dir: "data/models"
 
 reporting:
   top_n_cohorts: 50

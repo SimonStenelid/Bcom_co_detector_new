@@ -87,9 +87,13 @@ def build_features(date: str, config: Config) -> Dict[str, Any]:
     features_df = _add_historical_features(features_df, date, config)
     
     # Save features
-    output_path = config.get_paths(date)['features']
+    paths = config.get_paths(date)
+    raw_path = paths['raw']
+    output_path = paths['features']
+    if output_path == raw_path:
+        output_path = raw_path.with_name(f"{raw_path.stem}_features.parquet")
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     logger.info(f"Saving features to: {output_path}")
     features_df.to_parquet(output_path, index=False, compression='snappy')
     
